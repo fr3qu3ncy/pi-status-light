@@ -12,7 +12,7 @@ piHostname = socket.gethostname()
 
 LedPin_1 = 27        # pin13 --- status light
 
-led_thread_type = "none"    # Type of lighting thread to run. [none, all, rotate, twinkle fast, twinkle medium, twinkle slow, sparkle fast, sparkle medium, sparkle slow] This is to controll stopping thread
+led_thread_type = "none"    # Type of lighting thread to run. [none, all, rotate, breath fast, breath medium, breath slow, sparkle fast, sparkle medium, sparkle slow] This is to controll stopping thread
 
 logging
 log_path = "/var/log/pi-status-light/"
@@ -52,14 +52,14 @@ def on_all():
         logger.info("Led Thread: All - alreaday running")
     time.sleep(1)
 
-def on_twinkle(speed):
+def on_breath(speed):
     global led_thread_type
     global led_thread
-    global twinkle_speed
-    twinkle_speed = speed # Update global variable to fast (0.5 sec) or slow (1 sec). Could be any number of seconds.
-    if led_thread_type!="twinkle":
-        led_thread_type = "twinkle"
-        try:                        # If led thread is runing and not 'twinkle' then stop it.
+    global breath_speed
+    breath_speed = speed # Update global variable to fast (0.5 sec) or slow (1 sec). Could be any number of seconds.
+    if led_thread_type!="breath":
+        led_thread_type = "breath"
+        try:                        # If led thread is runing and not 'breath' then stop it.
             led_thread.isAlive()
             time.sleep(0.05)
             logger.debug("Thread was running.. but should stop???")
@@ -67,10 +67,10 @@ def on_twinkle(speed):
         except NameError:
             logger.info("Thread not running")
         
-        led_thread = threading.Thread(target=start_thread_twinkle) # Start new led thread
+        led_thread = threading.Thread(target=start_thread_breath) # Start new led thread
         led_thread.start()
     else:
-        logger.info("Led Thread: Twinkle - alreaday running - Twinkle Speed %s secs", twinkle_speed) # If just updating twinkle_speed then we keep the twinkle thread running
+        logger.info("Led Thread: breath - alreaday running - breath Speed %s secs", breath_speed) # If just updating breath_speed then we keep the breath thread running
 
 
 ## Functions for light pattern threads
@@ -85,26 +85,26 @@ def start_thread_all():
         check_thread_type_and_sleep(1)
     logger.info("Led Thread: All - STOP")
 
-def start_thread_twinkle():
+def start_thread_breath():
     def check_thread_type_and_sleep(thread_sleep):
-        if led_thread_type == "twinkle":
+        if led_thread_type == "breath":
             time.sleep(thread_sleep)
             logger.debug(led_thread_type)
     # Set up LED pins to be PWM so we can change the brightness
     led_pwm_1 = GPIO.PWM(LedPin_1,1000)
     led_pwm_1.start(0)
-    logger.info("Led Thread: Twinkle - STARTED - Twinkle Speed %s secs", twinkle_speed)
-    while led_thread_type == "twinkle":
-        # led_value 10 to 100 (brighten)
-        for pwm_value in range(10,101,1):
+    logger.info("Led Thread: breath - STARTED - Breath Speed %s secs", breath_speed)
+    while led_thread_type == "breath":
+        # led_value 20 to 100 (brighten)
+        for pwm_value in range(20,101,1):
             led_pwm_1.ChangeDutyCycle(pwm_value)
-            check_thread_type_and_sleep(twinkle_speed / 100)
-        # led_value 100 to 10 (dimm)
-        for pwm_value in range(100,10,-1):
+            check_thread_type_and_sleep(breath_speed / 100)
+        # led_value 100 to 20 (dimm)
+        for pwm_value in range(100,20,-1):
             led_pwm_1.ChangeDutyCycle(pwm_value)
-            check_thread_type_and_sleep(twinkle_speed / 100)
+            check_thread_type_and_sleep(breath_speed / 100)
     led_pwm_1.stop()
-    logger.info("Led Thread: Twinkle - STOP")
+    logger.info("Led Thread: breath - STOP")
 
 ##
 ## Logging
@@ -140,7 +140,7 @@ def mkdir_p(path):
 def testcode():
     on_all()
     time.sleep(2)
-    on_twinkle(1)
+    on_breath(1)
 
 
 ##
