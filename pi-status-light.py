@@ -99,6 +99,8 @@ def start_thread_breath():
         for pwm_value in range(20,101,1):
             led_pwm_1.ChangeDutyCycle(pwm_value)
             check_thread_type_and_sleep(breath_speed / 100)
+        # hold at 100
+        time.sleep(breath_speed * 2)
         # led_value 100 to 20 (dimm)
         for pwm_value in range(100,20,-1):
             led_pwm_1.ChangeDutyCycle(pwm_value)
@@ -140,7 +142,7 @@ def mkdir_p(path):
 def testcode():
     on_all()
     time.sleep(2)
-    on_breath(1)
+    on_breath(0.5)
 
 
 ##
